@@ -1,0 +1,53 @@
+# Node.js dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# dotenv environment files
+.env
+.env.*
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# IDE/editor specific
+.vscode/
+.idea/
+
+# Output and builds
+dist/
+build/
+out/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Coverage reports
+coverage/
+
+# PM2 process files
+pids/
+*.pid
+*.seed
+
+# Database files
+*.sqlite
+*.db
+
+# Uploads / Storage (optional, if you store uploads locally)
+uploads/
+storage/
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional: Ignore test reports
+test-results/
+jest-coverage/
