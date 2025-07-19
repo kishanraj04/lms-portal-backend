@@ -1,6 +1,7 @@
 import { User } from "../models/User.model.js";
 import { genAndSaveToken } from "../utils/genAndSaveToken.js";
 import { isUserExist } from "../utils/isUserExist.js";
+import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 export const userRegister = async(req,res)=>{
     try {
@@ -32,8 +33,25 @@ export const userLogin = async(req,res)=>{
         if(!isCorrect){
             return res.status(404).json({success:false,message:"invalid email or password"})
         }
-        genAndSaveToken(req,res)
+        genAndSaveToken(req,res,isExist)
     } catch (error) {
-        
+        console.log(error?.message);
+    }
+}
+
+export const directLogin = async(req,res)=>{
+    try {
+    const token = req.cookies.token
+        if(!token){
+            return res.status(401).json({success:false,message:"unauthorized access"})
+        }
+    const user = await jwt.verify(token,process.env.JWT_SECRET)
+    if(!user){
+       return res.status(401).json({success:false,message:"unauthorized access"})
+    }
+
+    return res.status(200).json({success:true,message:"valid user",user})
+    } catch (error) {
+        console.log(error?.message);
     }
 }
