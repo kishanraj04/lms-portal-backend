@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 export const userRegister = async(req,res)=>{
     try {
+        console.log(req.body);
         const {name,email,password,avatar} = req.body
         if(!name || !email || !password){
             return res.status(400).json({success:false,message:"all fields are required"})
