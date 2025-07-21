@@ -76,3 +76,16 @@ export const directLogin = async (req, res) => {
     console.log(error?.message);
   }
 };
+
+export const logoutUser = async(req,res)=>{
+  try {
+    const token = req.cookies.token
+    if(!token){
+      return res.status(400).json({success:false,message:"user already logout"})
+    }
+
+    res.clearCookie("token").json({success:true,message:"user logout"})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
