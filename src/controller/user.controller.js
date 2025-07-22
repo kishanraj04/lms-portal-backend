@@ -3,6 +3,8 @@ import { genAndSaveToken } from "../utils/genAndSaveToken.js";
 import { isUserExist } from "../utils/isUserExist.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import cloudinary from "../../config/cloudinary.config.js";
+import { getPublicId } from "../helper/helper.js";
 export const userRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -26,7 +28,7 @@ export const userRegister = async (req, res) => {
         .json({ success: false, message: "user exist with this email" });
     }
 
-    const user = await User.create({ name, email, password ,avatar:fileUrl});
+    const user = await User.create({ name, email, password, avatar: fileUrl });
     return res
       .status(200)
       .json({ success: true, message: "user created", user });
@@ -70,22 +72,92 @@ export const directLogin = async (req, res) => {
         .status(401)
         .json({ success: false, message: "unauthorized access" });
     }
+    const email = user?.email;
+    if (!email) {
+      return res
+        .status(401)
+        .json({ success: false, message: "unauthorized access" });
+    }
 
-    return res.status(200).json({ success: true, message: "valid user", user });
+    const usr = await User.findOne({ email });
+    if (!usr) {
+      return res
+        .status(404)
+        .json({ success: false, message: "unauthorized user" });
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "valid user", user: usr });
   } catch (error) {
     console.log(error?.message);
   }
 };
 
-export const logoutUser = async(req,res)=>{
+export const logoutUser = async (req, res) => {
   try {
-    const token = req.cookies.token
-    if(!token){
-      return res.status(400).json({success:false,message:"user already logout"})
+    const token = req.cookies.token;
+    if (!token) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user already logout" });
     }
 
-    res.clearCookie("token").json({success:true,message:"user logout"})
+    res.clearCookie("token").json({ success: true, message: "user logout" });
   } catch (error) {
-    return res.status(500).json({success:false,message:error?.message})
+    return res.status(500).json({ success: false, message: error?.message });
   }
-}
+};
+
+export const updateUserProfile = async (req, res) => {
+  try {
+    const { name, role, avatar } = req.body;
+    const file = req?.file;
+
+    if (!file && !avatar) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please upload avatar" });
+    }
+
+    const { email } = req.user;
+    const oldUser = await User.findOne({ email });
+    if (!oldUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    // If new image uploaded but no new avatar URL (old image still exists)
+    let fileUrl = "";
+    if (file && !avatar && oldUser?.avatar) {
+      const publicId = getPublicId(oldUser.avatar);
+      fileUrl = req?.file?.path;
+      const result = await cloudinary.uploader.destroy(publicId, {
+        invalidate: true,
+      });
+
+      const updatedUser = await User.findOneAndUpdate(
+        { email: email },
+        {
+          $set: {
+            name: name,
+            avatar: fileUrl,
+          },
+        },
+        { new: true }
+      );
+    }else{
+      await User?.findOneAndUpdate({email:email},{
+        name:name,
+        role:role
+      })
+    }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error?.message });
+  }
+};

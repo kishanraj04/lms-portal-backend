@@ -3,7 +3,7 @@ export const genAndSaveToken = async(req,res,user)=>{
    try {
     const {email} = req.body
     const token = jwt.sign({name:user?.name,email:user?.email},process.env.JWT_SECRET, { expiresIn: '7d' })
-    
+   
     res.cookie("token",token,{
         httpOnly:true,
         sameSite:"none",
