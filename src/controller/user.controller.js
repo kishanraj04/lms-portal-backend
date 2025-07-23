@@ -111,14 +111,9 @@ export const logoutUser = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
-    const { name, role, avatar } = req.body;
+    const { name, role } = req.body;
     const file = req?.file;
-
-    if (!file && !avatar) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please upload avatar" });
-    }
+    
 
     const { email } = req.user;
     const oldUser = await User.findOne({ email });
@@ -130,7 +125,7 @@ export const updateUserProfile = async (req, res) => {
 
     // If new image uploaded but no new avatar URL (old image still exists)
     let fileUrl = "";
-    if (file && !avatar && oldUser?.avatar) {
+    if (file && oldUser?.avatar) {
       const publicId = getPublicId(oldUser.avatar);
       fileUrl = req?.file?.path;
       const result = await cloudinary.uploader.destroy(publicId, {
@@ -161,3 +156,21 @@ export const updateUserProfile = async (req, res) => {
     return res.status(500).json({ success: false, message: error?.message });
   }
 };
+
+export const getUserProfile = async(req,res)=>{
+  try {
+    const {email} = req?.user
+    if(!email){
+      return res.status(500).json({success:false,message:"unauthorized user"})
+    }
+
+    const user = await User.findOne({email})
+    if(!user){
+      return res.status(404).json({success:false,message:"user not found"})
+    }
+
+    return res.status(200).json({success:true,message:"user found",user})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
