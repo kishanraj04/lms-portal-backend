@@ -1,6 +1,6 @@
 import express from 'express'
 import { isAuthenticated } from '../middleware/isAuthenticated.js'
-import { createCourse, getAllCourses } from '../controller/course.controller.js'
+import { createCourse, getAllCourses, getCourseById, getMyCourses } from '../controller/course.controller.js'
 import { isInstructor } from '../middleware/isInstructor.js'
 import {  uploadThumbnail } from '../middleware/multer.js'
 
@@ -10,4 +10,7 @@ courseRoute.post("/create",uploadThumbnail,isAuthenticated,isInstructor,createCo
 
 courseRoute.get("/allCourse",isAuthenticated,getAllCourses)
 
+courseRoute.get("/me",isAuthenticated,isInstructor,getMyCourses)
+
+courseRoute.get("/:id",isAuthenticated,isInstructor,getCourseById)
 export {courseRoute}

@@ -60,9 +60,36 @@ export const createCourse = async (req, res) => {
 
 export const getAllCourses  = async(req,res)=>{
     try {
-        const courses = await Course.find({});
+        const courses = await Course.find({}).populate("creator","name avatar");
         return res.status(200).json({success:true,message:courses})
     } catch (error) {
         return res.status(500).json({success:false,message:error?.message})
     }
+}
+
+export const getMyCourses  = async(req,res)=>{
+    try {
+        
+        const courses = await Course.find({creator:req?.user?._id})
+        console.log(courses);
+        return res.status(200).json({success:true,myCourses:courses})
+    } catch (error) {
+        return res.status(500).json({success:false,message:error?.message})
+    }
+}
+
+export const getCourseById = async(req,res)=>{
+  try {
+    const {id} = req?.params
+    if(!id){
+      return res.status(404).json({success:false,message:"course not found"})
+    }
+    const course = await Course.findById({_id:id})
+    if(!course){
+      return res.status(404).json({success:false,message:"course not found"})
+    }
+    return res.status(200).json({success:true,course})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
 }

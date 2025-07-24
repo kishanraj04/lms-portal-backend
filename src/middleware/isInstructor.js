@@ -8,7 +8,7 @@ export const isInstructor = async(req,res,next)=>{
             return res.status(404).json({success:false,message:"user not found"})
         }
         if(userDet?.role!="Instructor"){
-            return res.status(400).json({success:false,message:"you can`t create course"})
+            return res.status(400).json({success:false,message:"unauthorized user"})
         }
         req.user = userDet;
         next()
