@@ -23,7 +23,7 @@ const courseSchema = new mongoos.Schema({
   courselevel:{
     type:String,
     required:true,
-    enum:["basic","advance"]
+    enum:["basic","medium","advance"]
   },
   creator:{
     type:mongoos.Schema.ObjectId,

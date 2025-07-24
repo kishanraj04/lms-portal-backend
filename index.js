@@ -6,6 +6,7 @@ dotenv.config();
 import './config/db.config.js';
 import { userRouter } from './src/routes/user.route.js';
 import cookieParser from 'cookie-parser';
+import { courseRoute } from './src/routes/course.route.js';
 
 const app = express();
 
@@ -21,6 +22,9 @@ app.use(cors({
 app.use(cookieParser())
 // User routes
 app.use("/api/v1/user", userRouter);
+
+// course route
+app.use("/api/v1/course",courseRoute)
 
 app.listen(process.env.PORT, () => {
     console.log("✅ Server listening on", process.env.PORT);
