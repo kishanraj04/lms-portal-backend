@@ -17,6 +17,7 @@ const storage = new CloudinaryStorage({
 const uploader = multer({ storage });
 
 export const uploadSingle = uploader.single('avatar');
+export const uploadThumbnail = uploader.single("thumbnail");
 export const uploadMultiple = uploader.array('files', 10); 
 
 // Or export generic uploader for custom use
