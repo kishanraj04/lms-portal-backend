@@ -1,4 +1,5 @@
 import { Course } from "../models/Course.model.js";
+import { Lecture } from "../models/Lecture.model.js";
 export const createCourse = async (req, res) => {
   try {
     const user = req?.user;
@@ -124,3 +125,36 @@ export const editCourse = async(req,res)=>{
     return res.status(500).json({success:false,message:error?.message})
   }
 }
+export const uploadLecture = async (req, res) => {
+  try {
+    const { id: courseId } = req.params;
+    const { title, isFree } = req.body;
+
+
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const {path,filename} = req.file
+
+    const lecture = {
+      vedio:{
+        public_id:filename,
+        url:path
+      },
+      lectureTitle:title,
+      courseId,
+      isFree
+      
+    }
+    const createdLecture = await Lecture.create(lecture)
+
+    res.status(200).json({
+      message: "Lecture uploaded successfully",
+      createdLecture,
+    });
+  } catch (error) {
+    console.error("Upload failed:", error.message);
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -18,7 +18,7 @@ const uploader = multer({ storage });
 
 export const uploadSingle = uploader.single('avatar');
 export const uploadThumbnail = uploader.single("thumbnail");
-export const uploadMultiple = uploader.array('files', 10); 
+export const uploadLectureMidd = uploader.single('lectureVedio'); 
 
 // Or export generic uploader for custom use
 export default uploader;

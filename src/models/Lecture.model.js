@@ -12,7 +12,15 @@ const lectureSchema = new mongoose.Schema({
       lectureTitle:{
         type:String,
         required:true
+      },
+      courseId:{
+        type:mongoose.Types.ObjectId,
+        ref:"Course"
+      },
+      isFree:{
+        type:Boolean,
+        default:false
       }
 })
 
-const LectureSchema = mongoose.model("LectureSchema",lectureSchema)
+export const Lecture = mongoose.model("Lecture",lectureSchema)
