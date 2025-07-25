@@ -2,40 +2,52 @@ import { Course } from "../models/Course.model.js";
 export const createCourse = async (req, res) => {
   try {
     const user = req?.user;
+
     const {
       title,
       price,
       discountPrice,
       description,
       courselevel,
-    } = req?.body;
+    } = req.body;
 
-    console.log({ title, price, discountPrice, description, courselevel });
+    const { path, filename } = req.file || {};
+
+    // Log request for debugging
+    console.log("Incoming course creation request");
+
+    console.log({
+      title,
+      price,
+      discountPrice,
+      description,
+      courselevel,
+      path,
+      filename,
+    });
 
     // Validate required fields
-    if (!title || !price || !description || !courselevel || !discountPrice) {
+    if (!title || !price || !discountPrice || !description || !courselevel || !req.file) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
     }
 
-    const { path, filename } = req?.file;
-
-    const course = {
-      title: title,
+    const newCourse = {
+      title,
       thumbnail: {
         public_id: filename,
         url: path,
       },
-      price: price,
-      discountPrice: discountPrice,
-      description: description,
-      courselevel: courselevel,
+      price,
+      discountPrice,
+      description,
+      courselevel,
       creator: user?._id,
     };
 
-    const createdCourse = await Course.create(course);
+    const createdCourse = await Course.create(newCourse);
 
     if (!createdCourse) {
       return res.status(500).json({
@@ -51,12 +63,15 @@ export const createCourse = async (req, res) => {
     });
 
   } catch (error) {
+    console.error("Error creating course:", error);
+
     return res.status(500).json({
       success: false,
       message: error?.message || "Internal Server Error",
     });
   }
 };
+
 
 export const getAllCourses  = async(req,res)=>{
     try {
@@ -89,6 +104,22 @@ export const getCourseById = async(req,res)=>{
       return res.status(404).json({success:false,message:"course not found"})
     }
     return res.status(200).json({success:true,course})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const editCourse = async(req,res)=>{
+  try {
+    const {id} = req?.params
+    if(!id){
+      return res.status(404).json({success:false,message:"Not a valid course"})
+    }
+    const {title,price,discountPrice,description,courseLevel} = req.body
+    
+    const updatedCourse = await Course.findByIdAndUpdate({_id:id},{title,price,discountPrice,description,courseLevel},{new:true})
+
+    return res.status(200).json({success:true,message:"course updated",updatedCourse})
   } catch (error) {
     return res.status(500).json({success:false,message:error?.message})
   }

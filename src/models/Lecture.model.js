@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const lectureSchema = new mongoose.Schema({
-      content:{
+      vedio:{
         public_id:{
             type:String,
         },
@@ -9,9 +9,9 @@ const lectureSchema = new mongoose.Schema({
             type:String
         }
       },
-      creator:{
-        type:mongoose.Types.ObjectId,
-        ref:"User"
+      lectureTitle:{
+        type:String,
+        required:true
       }
 })
 
