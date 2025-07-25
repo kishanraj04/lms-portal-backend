@@ -1,3 +1,4 @@
+import cloudinary from "../../config/cloudinary.config.js";
 import { Course } from "../models/Course.model.js";
 import { Lecture } from "../models/Lecture.model.js";
 export const createCourse = async (req, res) => {
@@ -125,36 +126,82 @@ export const editCourse = async(req,res)=>{
     return res.status(500).json({success:false,message:error?.message})
   }
 }
+
 export const uploadLecture = async (req, res) => {
   try {
     const { id: courseId } = req.params;
     const { title, isFree } = req.body;
 
+    console.log(" Upload started with:", { courseId, title, isFree });
 
+    // Validate required data
     if (!req.file) {
+      console.log("No file received");
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const {path,filename} = req.file
+    const { path, filename } = req.file;
+
+    console.log("✅ Cloudinary upload complete:", {
+      url: path,
+      public_id: filename,
+    });
 
     const lecture = {
-      vedio:{
-        public_id:filename,
-        url:path
+      vedio: {
+        public_id: filename,
+        url: path,
       },
-      lectureTitle:title,
+      lectureTitle: title,
       courseId,
-      isFree
-      
-    }
-    const createdLecture = await Lecture.create(lecture)
+      isFree: isFree === "true" || isFree === true, // handle string/boolean
+    };
 
-    res.status(200).json({
+    const createdLecture = await Lecture.create(lecture);
+
+    res.status(201).json({
       message: "Lecture uploaded successfully",
-      createdLecture,
+      data: createdLecture,
     });
   } catch (error) {
-    console.error("Upload failed:", error.message);
-    res.status(500).json({ error: error.message });
+    console.error(" Upload failed:", error.message);
+    return res.status(500).json({
+      error: "Internal server error: " + error.message,
+    });
   }
 };
+
+export const getLectureVedioInstructor = async(req,res)=>{
+  try {
+    const {courseId} = req?.params
+    if(!courseId){
+      return res.status(400).json({success:false,message:"select course"})
+    }
+
+    const lectures = await Lecture.find({courseId})
+    return res.status(200).json({success:true,lectures})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const deleteLecture = async(req,res)=>{
+  try {
+    const {lectureId} = req?.params
+    const {public_id} = req?.body
+    console.log(public_id,lectureId);
+    if(!lectureId){
+      return res.status(400).json({success:false,message:"plese select lecture to delete"})
+    }
+    const resp = await cloudinary.uploader.destroy(public_id,{ resource_type: "video",invalidate:true})
+    console.log(resp);
+    const deleteLecture = await Lecture.findByIdAndDelete({_id:lectureId})
+    console.log(deleteLecture);
+    if(deleteLecture){
+      return res.status(200).json({success:true,message:"lecture deleted"})
+    }
+  } catch (error) {
+    console.log(error?.message);
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}

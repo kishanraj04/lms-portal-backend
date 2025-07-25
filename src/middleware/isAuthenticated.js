@@ -8,7 +8,7 @@ export const isAuthenticated = async(req,res,next)=>{
 
         const decoded =  jwt.verify(token,process.env.JWT_SECRET)
         req.user = {name:decoded?.name,email:decoded?.email}
-        console.log(decoded);
+        console.log("decoded ",decoded);
         next();
     } catch (error) {
         return res.status(500).json({sucess:false,message:error?.message})
