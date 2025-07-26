@@ -44,7 +44,11 @@ const courseSchema = new mongoos.Schema({
   lectures:[{
     type:mongoos.Types.ObjectId,
     ref:"Lecture"
-  }]
+  }],
+  isPublish:{
+    type:Boolean,
+    default:false
+  }
 });
 
 export const Course = mongoos.model("Course", courseSchema);

@@ -77,7 +77,7 @@ export const createCourse = async (req, res) => {
 
 export const getAllCourses  = async(req,res)=>{
     try {
-        const courses = await Course.find({}).populate("creator","name avatar");
+        const courses = await Course.find({isPublish:true}).populate("creator","name avatar");
         return res.status(200).json({success:true,message:courses})
     } catch (error) {
         return res.status(500).json({success:false,message:error?.message})
@@ -132,7 +132,6 @@ export const uploadLecture = async (req, res) => {
     const { id: courseId } = req.params;
     const { title, isFree } = req.body;
 
-    console.log(" Upload started with:", { courseId, title, isFree });
 
     // Validate required data
     if (!req.file) {
@@ -157,7 +156,11 @@ export const uploadLecture = async (req, res) => {
       isFree: isFree === "true" || isFree === true, // handle string/boolean
     };
 
-    const createdLecture = await Lecture.create(lecture);
+    const createdLecture =await  Lecture.create(lecture);
+    console.log(createdLecture);
+    const course = await Course.findById({_id:courseId})
+    course.lectures.push(createdLecture?._id)
+    await course.save()
 
     res.status(201).json({
       message: "Lecture uploaded successfully",
@@ -189,14 +192,20 @@ export const deleteLecture = async(req,res)=>{
   try {
     const {lectureId} = req?.params
     const {public_id} = req?.body
-    console.log(public_id,lectureId);
+
     if(!lectureId){
       return res.status(400).json({success:false,message:"plese select lecture to delete"})
     }
     const resp = await cloudinary.uploader.destroy(public_id,{ resource_type: "video",invalidate:true})
-    console.log(resp);
+
+    // remove lecture form course doc
+    const course = await Lecture.findById({_id:lectureId})
+   await Course.updateOne({_id:course?.courseId},{$pull:{lectures:lectureId}})
+
     const deleteLecture = await Lecture.findByIdAndDelete({_id:lectureId})
-    console.log(deleteLecture);
+    
+    
+
     if(deleteLecture){
       return res.status(200).json({success:true,message:"lecture deleted"})
     }
