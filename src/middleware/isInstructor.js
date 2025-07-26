@@ -2,6 +2,7 @@ import { User } from "../models/User.model.js"
 
 export const isInstructor = async(req,res,next)=>{
     try {
+        
         const user = req.user
         const userDet = await User.findOne({email:user?.email})
         if(!userDet){

@@ -61,4 +61,5 @@ courseRoute.put("/updata/lecture/:lectureId",isAuthenticated,isInstructor,upload
 
 courseRoute.get("/lecture/:lectureId",isAuthenticated,isInstructor,getSingleLecture)
 
+// courseRoute.put("/lecture/update",isAuthenticated,isInstructor,up,updateLecture)
 export { courseRoute };

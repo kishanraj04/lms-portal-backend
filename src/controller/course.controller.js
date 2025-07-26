@@ -206,34 +206,61 @@ export const deleteLecture = async(req,res)=>{
   }
 }
 
-export const editLecture = async(req,res)=>{
+export const editLecture = async (req, res) => {
   try {
-    const {lectureId} = req?.params;
-    const {title} = req?.body
-    const {path,filename} = req?.file
-    if(!path||!filename){
-      const updatedLecture = await Lecture.findByIdAndUpdate({_id:lectureId},{$set:{lectureTitle:title}})
+    const { lectureId } = req.params;
+    const { title } = req.body;
+    const file = req.file;
 
-      return res.status(200).json({success:true,message:"Lecture updated"})
+    if (!lectureId || !title) {
+      return res.status(400).json({
+        success: false,
+        message: "lectureId and title are required",
+      });
     }
 
-    const lecture = await Lecture.findById({_id:lectureId})
-    await cloudinary.uploader.destroy(lecture?.public_id)
-
-    lecture.vedio = {
-      public_id:filename,
-      url:path
+    const lecture = await Lecture.findById({_id:lectureId});
+    if (!lecture) {
+      return res.status(404).json({
+        success: false,
+        message: "Lecture not found",
+      });
     }
 
-    const updated = await lecture.save()
+    // Update title
+    lecture.lectureTitle = title;
 
-    return res.status(200).json({success:true,message:"lecture updated",updated})
+    // If new video is uploaded
+    if (file?.path && file?.filename) {
+      // Delete old video from Cloudinary
+      if (lecture.vedio?.public_id) {
+        await cloudinary.uploader.destroy(lecture.vedio.public_id);
+      }
 
+      // Set new video info
+      lecture.vedio = {
+        public_id: file.filename,
+        url: file.path,
+      };
+    }
+
+    // Save the updated lecture
+    const updated = await lecture.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Lecture updated successfully",
+      updated,
+    });
   } catch (error) {
-     console.log(error?.message);
-    return res.status(500).json({success:false,message:error?.message})
+    console.log("Edit Lecture Error:", error.message);
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Internal Server Error",
+    });
   }
-}
+};
+
 
 export const getSingleLecture = async(req,res)=>{
   try {
