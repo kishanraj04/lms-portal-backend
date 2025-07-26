@@ -205,3 +205,50 @@ export const deleteLecture = async(req,res)=>{
     return res.status(500).json({success:false,message:error?.message})
   }
 }
+
+export const editLecture = async(req,res)=>{
+  try {
+    const {lectureId} = req?.params;
+    const {title} = req?.body
+    const {path,filename} = req?.file
+    if(!path||!filename){
+      const updatedLecture = await Lecture.findByIdAndUpdate({_id:lectureId},{$set:{lectureTitle:title}})
+
+      return res.status(200).json({success:true,message:"Lecture updated"})
+    }
+
+    const lecture = await Lecture.findById({_id:lectureId})
+    await cloudinary.uploader.destroy(lecture?.public_id)
+
+    lecture.vedio = {
+      public_id:filename,
+      url:path
+    }
+
+    const updated = await lecture.save()
+
+    return res.status(200).json({success:true,message:"lecture updated",updated})
+
+  } catch (error) {
+     console.log(error?.message);
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const getSingleLecture = async(req,res)=>{
+  try {
+    const {lectureId} = req.params
+    if(!lectureId){
+      return res.status(400).json({success:false,message:"select lecture"})
+    }
+
+    const lecture = await Lecture.findById({_id:lectureId})
+    if(!lecture){
+      return res.status(404).json({success:false,message:"lecture not found"})
+    }
+
+    return res.status(200).json({success:true,message:"lecture found",lecture})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}

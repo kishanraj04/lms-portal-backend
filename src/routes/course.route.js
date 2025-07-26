@@ -4,10 +4,12 @@ import {
   createCourse,
   deleteLecture,
   editCourse,
+  editLecture,
   getAllCourses,
   getCourseById,
   getLectureVedioInstructor,
   getMyCourses,
+  getSingleLecture,
   uploadLecture,
 } from "../controller/course.controller.js";
 import { isInstructor } from "../middleware/isInstructor.js";
@@ -54,5 +56,9 @@ courseRoute.post(
 courseRoute.get("/getlecture/instructor/:courseId",isAuthenticated,isInstructor,getLectureVedioInstructor)
 
 courseRoute.delete("/delete/lecture/:lectureId",isAuthenticated,isInstructor,deleteLecture)
+
+courseRoute.put("/updata/lecture/:lectureId",isAuthenticated,isInstructor,uploadLectureMidd,editLecture)
+
+courseRoute.get("/lecture/:lectureId",isAuthenticated,isInstructor,getSingleLecture)
 
 export { courseRoute };
