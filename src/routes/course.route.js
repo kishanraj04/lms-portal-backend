@@ -10,6 +10,7 @@ import {
   getLectureVedioInstructor,
   getMyCourses,
   getSingleLecture,
+  makeCoursePublic,
   uploadLecture,
 } from "../controller/course.controller.js";
 import { isInstructor } from "../middleware/isInstructor.js";
@@ -61,5 +62,6 @@ courseRoute.put("/updata/lecture/:lectureId",isAuthenticated,isInstructor,upload
 
 courseRoute.get("/lecture/:lectureId",isAuthenticated,isInstructor,getSingleLecture)
 
+courseRoute.put("/publishthecourse/:courseId",isAuthenticated,isInstructor,makeCoursePublic)
 // courseRoute.put("/lecture/update",isAuthenticated,isInstructor,up,updateLecture)
 export { courseRoute };

@@ -16,17 +16,17 @@ export const createCourse = async (req, res) => {
     const { path, filename } = req.file || {};
 
     // Log request for debugging
-    console.log("Incoming course creation request");
+    // console.log("Incoming course creation request");
 
-    console.log({
-      title,
-      price,
-      discountPrice,
-      description,
-      courselevel,
-      path,
-      filename,
-    });
+    // console.log({
+    //   title,
+    //   price,
+    //   discountPrice,
+    //   description,
+    //   courselevel,
+    //   path,
+    //   filename,
+    // });
 
     // Validate required fields
     if (!title || !price || !discountPrice || !description || !courselevel || !req.file) {
@@ -88,7 +88,6 @@ export const getMyCourses  = async(req,res)=>{
     try {
         
         const courses = await Course.find({creator:req?.user?._id})
-        console.log(courses);
         return res.status(200).json({success:true,myCourses:courses})
     } catch (error) {
         return res.status(500).json({success:false,message:error?.message})
@@ -285,6 +284,26 @@ export const getSingleLecture = async(req,res)=>{
 
     return res.status(200).json({success:true,message:"lecture found",lecture})
   } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const makeCoursePublic = async(req,res)=>{
+  try {
+    console.log("req");
+    const {courseId} = req?.params;
+    const {isPublish} = req?.body;
+    console.log("CI ",courseId,isPublish,req?.body);
+    const course = await Course.findById({_id:courseId})
+    if(!course){
+      return res.status(200).json({success:false,message:"course not found"})
+    }
+    course.isPublish = isPublish;
+    await course.save()
+
+    return res.status(200).json({success:true,message:"course now published"})
+  } catch (error) {
+    console.log(error?.message);
     return res.status(500).json({success:false,message:error?.message})
   }
 }
