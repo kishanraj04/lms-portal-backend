@@ -1,5 +1,4 @@
 import express from "express";
-import { isAuthenticated } from "../middleware/isAuthenticated.js";
 import {
   createCourse,
   deleteLecture,
@@ -13,6 +12,8 @@ import {
   makeCoursePublic,
   uploadLecture,
 } from "../controller/course.controller.js";
+import { createCheckoutSession, stripeWebhook } from "../controller/purchase.controller.js";
+import { isAuthenticated } from "../middleware/isAuthenticated.js";
 import { isInstructor } from "../middleware/isInstructor.js";
 import { uploadLectureMidd, uploadThumbnail } from "../middleware/multer.js";
 
@@ -63,5 +64,13 @@ courseRoute.put("/updata/lecture/:lectureId",isAuthenticated,isInstructor,upload
 courseRoute.get("/lecture/:lectureId",isAuthenticated,isInstructor,getSingleLecture)
 
 courseRoute.put("/publishthecourse/:courseId",isAuthenticated,isInstructor,makeCoursePublic)
-// courseRoute.put("/lecture/update",isAuthenticated,isInstructor,up,updateLecture)
+
+
+// checkout
+courseRoute.post("/checkout/create-checkout-session",isAuthenticated,createCheckoutSession)
+
+
+// courseRoute.post("/webhook",express.raw({type:"application/json"}),stripeWebhook)
+
 export { courseRoute };
+

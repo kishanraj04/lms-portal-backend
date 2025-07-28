@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 export const genAndSaveToken = async(req,res,user)=>{
    try {
     const {email} = req.body
-    const token = jwt.sign({name:user?.name,email:user?.email},process.env.JWT_SECRET, { expiresIn: '7d' })
+    const token = jwt.sign({_id:user?._id,name:user?.name,email:user?.email},process.env.JWT_SECRET, { expiresIn: '7d' })
    
     res.cookie("token",token,{
         httpOnly:true,

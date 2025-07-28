@@ -4,6 +4,10 @@ const courseSchema = new mongoos.Schema({
     type: String,
     required: true,
   },
+  subTitle:{
+    type:String,
+    required:true
+  },
   thumbnail:{
     public_id:{
       type:String,

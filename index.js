@@ -1,31 +1,39 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors'
-dotenv.config();
-
+// index.js or app.js
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import { userRouter } from "./src/routes/user.route.js";
+import { courseRoute } from "./src/routes/course.route.js";
 import './config/db.config.js';
-import { userRouter } from './src/routes/user.route.js';
-import cookieParser from 'cookie-parser';
-import { courseRoute } from './src/routes/course.route.js';
+import { stripeWebhook } from "./src/controller/purchase.controller.js";
+
+dotenv.config();
 
 const app = express();
 
-// Middleware to parse JSON
+// ✅ Mount the Stripe webhook route BEFORE using express.json()
+// ✅ NO middleware before this route
+app.post(
+  "/api/v1/course/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhook
+);
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// ✅ Other middleware (after webhook route)
 app.use(cors({
   origin: "http://localhost:5173",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   credentials: true,
 }));
-app.use(cookieParser())
-// User routes
-app.use("/api/v1/user", userRouter);
+app.use(cookieParser());
+app.use(express.json()); // will not interfere with webhook now
+app.use(express.urlencoded({ extended: true }));
 
-// course route
-app.use("/api/v1/course",courseRoute)
+// ✅ Your other routes
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/course", courseRoute);
 
 app.listen(process.env.PORT, () => {
-    console.log("✅ Server listening on", process.env.PORT);
+  console.log(`✅ Server listening on port ${process.env.PORT}`);
 });
