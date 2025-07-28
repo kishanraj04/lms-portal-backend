@@ -12,7 +12,7 @@ import {
   makeCoursePublic,
   uploadLecture,
 } from "../controller/course.controller.js";
-import { createCheckoutSession, stripeWebhook } from "../controller/purchase.controller.js";
+import { createCheckoutSession, getCourseDetailWithPurchaseStatus, stripeWebhook } from "../controller/purchase.controller.js";
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
 import { isInstructor } from "../middleware/isInstructor.js";
 import { uploadLectureMidd, uploadThumbnail } from "../middleware/multer.js";
@@ -69,6 +69,7 @@ courseRoute.put("/publishthecourse/:courseId",isAuthenticated,isInstructor,makeC
 // checkout
 courseRoute.post("/checkout/create-checkout-session",isAuthenticated,createCheckoutSession)
 
+courseRoute.get("/course/course-purchase-status",isAuthenticated,getCourseDetailWithPurchaseStatus)
 
 // courseRoute.post("/webhook",express.raw({type:"application/json"}),stripeWebhook)
 

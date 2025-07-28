@@ -7,6 +7,7 @@ export const createCourse = async (req, res) => {
 
     const {
       title,
+      subTitle,
       price,
       discountPrice,
       description,
@@ -38,6 +39,7 @@ export const createCourse = async (req, res) => {
 
     const newCourse = {
       title,
+      subTitle,
       thumbnail: {
         public_id: filename,
         url: path,
@@ -116,9 +118,9 @@ export const editCourse = async(req,res)=>{
     if(!id){
       return res.status(404).json({success:false,message:"Not a valid course"})
     }
-    const {title,price,discountPrice,description,courseLevel} = req.body
+    const {title,subTitle,price,discountPrice,description,courseLevel} = req.body
     
-    const updatedCourse = await Course.findByIdAndUpdate({_id:id},{title,price,discountPrice,description,courseLevel},{new:true})
+    const updatedCourse = await Course.findByIdAndUpdate({_id:id},{title,subTitle,price,discountPrice,description,courseLevel},{new:true})
 
     return res.status(200).json({success:true,message:"course updated",updatedCourse})
   } catch (error) {
