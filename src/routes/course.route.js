@@ -69,9 +69,10 @@ courseRoute.put("/publishthecourse/:courseId",isAuthenticated,isInstructor,makeC
 // checkout
 courseRoute.post("/checkout/create-checkout-session",isAuthenticated,createCheckoutSession)
 
-courseRoute.get("/course/course-purchase-status",isAuthenticated,getCourseDetailWithPurchaseStatus)
+// get course for detail page with purchase status
+courseRoute.get("/course/course-purchase-status/:courseId",isAuthenticated,getCourseDetailWithPurchaseStatus)
 
-// courseRoute.post("/webhook",express.raw({type:"application/json"}),stripeWebhook)
+
 
 export { courseRoute };
 

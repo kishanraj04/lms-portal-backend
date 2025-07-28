@@ -50,7 +50,9 @@ export const createCheckoutSession = async (req, res) => {
     });
 
     if (!session.url) {
-      return res.status(400).json({ success: false, message: "Error while creating session" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Error while creating session" });
     }
 
     newPurchase.paymentId = session.id;
@@ -63,14 +65,13 @@ export const createCheckoutSession = async (req, res) => {
   }
 };
 
-
 export const stripeWebhook = async (req, res) => {
   const signature = req.headers["stripe-signature"];
   const endpointSecret = process.env.WEBHOOK_ENDPOINT_SECRET;
   let event;
   try {
     // ✅ Construct event from raw body buffer
-    event = stripe.webhooks.constructEvent(req.body, signature,endpointSecret);
+    event = stripe.webhooks.constructEvent(req.body, signature, endpointSecret);
     console.log("✅ Event verified:", event.type);
   } catch (error) {
     console.error("❌ Webhook signature verification failed:", error.message);
@@ -84,7 +85,9 @@ export const stripeWebhook = async (req, res) => {
     const session = event.data.object;
 
     try {
-      const purchase = await Purchase.findOne({ paymentId: session.id }).populate("courseId");
+      const purchase = await Purchase.findOne({
+        paymentId: session.id,
+      }).populate("courseId");
 
       if (!purchase) {
         console.warn(`❌ No purchase found for session.id: ${session.id}`);
@@ -106,16 +109,16 @@ export const stripeWebhook = async (req, res) => {
           { $set: { isFree: true } }
         );
       }
-
-      // ✅ Add user to course + course to user
-      await User.findByIdAndUpdate(
-        purchase.userId,
-        { $addToSet: { enrolled: purchase.courseId._id } }
+      const userRes =  await User.updateOne(
+        { _id: purchase?.userId },
+        { $addToSet: { enrolled: purchase?.courseId } }
       );
 
-      await Course.findByIdAndUpdate(
-        purchase.courseId._id,
-        { $addToSet: { enrolledStudents: purchase.userId } }
+
+      const courseRes = await Course.findByIdAndUpdate(
+        purchase.courseId,
+        { $addToSet: { enrolledStudent: purchase.userId } },
+        { new: true }
       );
 
       console.log("✅ Purchase completed and data updated");
@@ -129,36 +132,56 @@ export const stripeWebhook = async (req, res) => {
   res.status(200).end();
 };
 
-
 export const getCourseDetailWithPurchaseStatus = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const {email} = req?.user
-     const usr = await User.findOne({ email });
-     const userId = usr?._id
+    const { email } = req?.user;
+
+    const usr = await User.findOne({ email });
+    const userId = usr?._id;
+
     const course = await Course.findById(courseId)
       .populate("creator")
       .populate("lectures");
-
-    const purchased = await Purchase.findOne({ userId, courseId });
 
     if (!course) {
       return res.status(404).json({ message: "course not found!" });
     }
 
+    const purchased = await Purchase.findOne({ userId, courseId });
+
+    let formattedLectures = [];
+
+    if (course.lectures && course.lectures.length > 0) {
+      formattedLectures = course.lectures.map((lecture, index) => {
+        const l = lecture.toObject();
+        if (!purchased && index !== 0) {
+          delete l.vedio; // remove video for non-purchased and not first
+        }
+        return l;
+      });
+    }
+
     return res.status(200).json({
-      course,
+      course: {
+        ...course.toObject(),
+        lectures: formattedLectures,
+      },
       purchased: !!purchased,
     });
+
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
+
 export const getAllPurchasedCourse = async (_, res) => {
   try {
-    const purchasedCourse = await Purchase.find({ paymentStatus: "completed" }).populate("courseId");
+    const purchasedCourse = await Purchase.find({
+      paymentStatus: "completed",
+    }).populate("courseId");
 
     return res.status(200).json({
       purchasedCourse: purchasedCourse || [],

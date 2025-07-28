@@ -53,6 +53,6 @@ const courseSchema = new mongoos.Schema({
     type:Boolean,
     default:false
   }
-});
+},{timestamps:true});
 
 export const Course = mongoos.model("Course", courseSchema);
