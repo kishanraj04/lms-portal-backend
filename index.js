@@ -7,6 +7,7 @@ import { userRouter } from "./src/routes/user.route.js";
 import { courseRoute } from "./src/routes/course.route.js";
 import './config/db.config.js';
 import { stripeWebhook } from "./src/controller/purchase.controller.js";
+import { lectureProgree } from "./src/routes/lecturprogress.route.js";
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 // ✅ Your other routes
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRoute);
+app.use("/api/v1/lectureprogress",lectureProgree)
 
 app.listen(process.env.PORT, () => {
   console.log(`✅ Server listening on port ${process.env.PORT}`);

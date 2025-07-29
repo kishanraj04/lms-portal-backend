@@ -156,7 +156,7 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
       formattedLectures = course.lectures.map((lecture, index) => {
         const l = lecture.toObject();
         if (!purchased && index !== 0) {
-          delete l.vedio; // remove video for non-purchased and not first
+          delete l.vedio; 
         }
         return l;
       });
