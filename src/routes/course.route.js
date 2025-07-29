@@ -10,6 +10,7 @@ import {
   getMyCourses,
   getSingleLecture,
   makeCoursePublic,
+  searchCourse,
   uploadLecture,
 } from "../controller/course.controller.js";
 import { createCheckoutSession, getCourseDetailWithPurchaseStatus, stripeWebhook } from "../controller/purchase.controller.js";
@@ -28,6 +29,8 @@ courseRoute.post(
 );
 
 courseRoute.get("/allCourse", isAuthenticated, getAllCourses);
+
+courseRoute.get("/course/:name",isAuthenticated,searchCourse)
 
 courseRoute.get("/me", isAuthenticated, isInstructor, getMyCourses);
 

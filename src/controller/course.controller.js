@@ -309,3 +309,21 @@ export const makeCoursePublic = async(req,res)=>{
     return res.status(500).json({success:false,message:error?.message})
   }
 }
+
+export const searchCourse = async (req, res) => {
+  try {
+    const { name } = req.params;
+    if (!name) {
+      return res.status(400).json({ success: false, message: "Search keyword is required" });
+    }
+
+    // Case-insensitive regex search on title
+    const course = await Course.find({
+      title: { $regex: name, $options: "i" },
+    }).populate("creator");
+
+    return res.status(200).json({ success: true, message:course });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
