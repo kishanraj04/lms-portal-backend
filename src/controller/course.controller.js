@@ -1,6 +1,8 @@
 import cloudinary from "../../config/cloudinary.config.js";
 import { Course } from "../models/Course.model.js";
 import { Lecture } from "../models/Lecture.model.js";
+import { LectureProgress } from "../models/LectureProgress.js";
+import { User } from "../models/User.model.js";
 export const createCourse = async (req, res) => {
   try {
     const user = req?.user;
@@ -327,3 +329,58 @@ export const searchCourse = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const userLearningProgress = async(req,res)=>{
+  try {
+      const {_id:userId} = req?.user
+      const colors = [
+  "Red",
+  "Green",
+  "Blue",
+  "Yellow",
+  "Orange",
+  "Purple",
+  "Pink",
+  "Brown",
+  "Black",
+  "White",
+  "Gray",
+  "Cyan",
+  "Magenta",
+  "Lime",
+  "Teal",
+  "Indigo",
+  "Violet",
+  "Maroon",
+  "Olive",
+  "Navy"
+];
+
+      const {enrolled} = await User.findById({_id:userId}).populate("enrolled","title _id lectures")
+      // console.log(enrolled);
+      // find the completed lectures
+      const lecProg =await Promise.all(enrolled?.map(async({_id:courseId})=>{
+            const comLect = await LectureProgress.find({userId,courseId}).countDocuments();
+            return {
+              courseId,
+              comLect
+            }
+      }))
+      // console.log(lecProg);
+
+      const formatedData = enrolled?.map(({_id:courseId,title,lectures})=>{
+         const {comLect} = lecProg?.find((lec)=>lec?.courseId==courseId)
+         let prog = 0;
+         if(lectures?.length){
+          prog = parseInt((comLect/lectures?.length)*100)
+         }
+         const colour1 = colors[Math.floor(Math.random() * colors.length)];
+         const colour2 = colors[Math.floor(Math.random() * colors.length)];
+         return {courseId,progressValue:prog,title:title.toUpperCase(),colour1,colour2}
+      })      
+
+      return res.status(200).json({success:false,progress:formatedData})
+  } catch (error) {
+    console.log(error?.message);
+  }
+}

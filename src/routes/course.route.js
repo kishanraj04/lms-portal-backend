@@ -12,6 +12,7 @@ import {
   makeCoursePublic,
   searchCourse,
   uploadLecture,
+  userLearningProgress,
 } from "../controller/course.controller.js";
 import { createCheckoutSession, getCourseDetailWithPurchaseStatus, stripeWebhook } from "../controller/purchase.controller.js";
 import { isAuthenticated } from "../middleware/isAuthenticated.js";
@@ -76,6 +77,9 @@ courseRoute.post("/checkout/create-checkout-session",isAuthenticated,createCheck
 courseRoute.get("/course/course-purchase-status/:courseId",isAuthenticated,getCourseDetailWithPurchaseStatus)
 
 
+
+// for learing page
+courseRoute.get("/course/learning/progress",isAuthenticated,userLearningProgress)
 
 export { courseRoute };
 
