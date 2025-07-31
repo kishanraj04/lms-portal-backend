@@ -22,13 +22,13 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
   },
-  course: {
+  course: [{
     type: mongoose.Types.ObjectId,
     ref: "Course"
-  },
+  }],
   role: {
     type: String,
-    enum: ["instructor", "student"],
+    enum: ["instructor", "student", "Instructor", "Student"],
     default: "student"
   },
   enrolled: [

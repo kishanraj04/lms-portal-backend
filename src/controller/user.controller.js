@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import cloudinary from "../../config/cloudinary.config.js";
 import { getPublicId } from "../helper/helper.js";
+import { model } from "mongoose";
 export const userRegister = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -164,7 +165,10 @@ export const getUserProfile = async(req,res)=>{
       return res.status(500).json({success:false,message:"unauthorized user"})
     }
 
-    const user = await User.findOne({email})
+    const user = await User.findOne({email}).populate({path:"enrolled",populate:{
+      path:"creator",
+      model:"User"
+    }})
     if(!user){
       return res.status(404).json({success:false,message:"user not found"})
     }

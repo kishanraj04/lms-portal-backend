@@ -54,6 +54,10 @@ export const createCourse = async (req, res) => {
     };
 
     const createdCourse = await Course.create(newCourse);
+    const usr = await User.findOne({_id:user?._id})
+    console.log(usr);
+    usr.course.push(createdCourse?._id)
+    await usr.save();
 
     if (!createdCourse) {
       return res.status(500).json({
