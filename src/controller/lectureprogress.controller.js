@@ -118,8 +118,18 @@ export const courseWithEnrollStudent = async (req, res) => {
 export const monthRevenue = async (req, res) => {
   try {
     const months = [
-      "jan", "feb", "mar", "apr", "may", "jun",
-      "jul", "aug", "sep", "oct", "nov", "dec",
+      "jan",
+      "feb",
+      "mar",
+      "apr",
+      "may",
+      "jun",
+      "jul",
+      "aug",
+      "sep",
+      "oct",
+      "nov",
+      "dec",
     ];
 
     // Step 1: Get course _ids created by this instructor
@@ -129,12 +139,12 @@ export const monthRevenue = async (req, res) => {
     );
 
     // Step 2: Extract _id values from courses
-    const courseIds = instructorCourses.map(course => course._id);
+    const courseIds = instructorCourses.map((course) => course._id);
 
     // Step 3: Get completed purchases for instructor's courses
     const purchases = await Purchase.find({
       courseId: { $in: courseIds },
-      paymentStatus: "completed"
+      paymentStatus: "completed",
     });
 
     // Step 4: Initialize month map
@@ -149,19 +159,21 @@ export const monthRevenue = async (req, res) => {
       }
     });
 
+    const monthRevenueArray = Array.from(monthMap.entries()).map(
+      ([month, revenue]) => ({
+        month: month.charAt(0).toUpperCase() + month.slice(1), // Capitalize first letter
+        revenue,
+      })
+    );
     // Step 6: Respond with the revenue data
     res.status(200).json({
       success: true,
-      data: Object.fromEntries(monthMap)
+      data:monthRevenueArray,
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: error.message
+      message: error.message,
     });
   }
 };
-
-
-
