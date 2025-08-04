@@ -5,6 +5,7 @@ import {
   editCourse,
   editLecture,
   exploreCourse,
+  feedBack,
   getAllCourses,
   getCourseById,
   getLectureVedioInstructor,
@@ -75,6 +76,8 @@ courseRoute.get("/course/learning/progress",isAuthenticated,userLearningProgress
 courseRoute.get("/explore/courses",isAuthenticated,exploreCourse)
 
 courseRoute.get("/me/enrolled-course",isAuthenticated,getMyEnrolledCourse)
+
+courseRoute.post("/cours/feedback",isAuthenticated,feedBack)
 
 export { courseRoute };
 

@@ -3,6 +3,7 @@ import { Course } from "../models/Course.model.js";
 import { Lecture } from "../models/Lecture.model.js";
 import { LectureProgress } from "../models/LectureProgress.js";
 import { Purchase } from "../models/Purchase.mode.js";
+import { Review } from "../models/Review.model.js";
 import { User } from "../models/User.model.js";
 export const createCourse = async (req, res) => {
   try {
@@ -421,6 +422,26 @@ export const getMyEnrolledCourse = async(req,res)=>{
     }))
 
     return res.status(200).json({success:true,course})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const feedBack = async(req,res)=>{
+  try {
+    const {courseId,review,rating} = req?.body
+    if(!courseId || !review || !rating){
+      return res.status(404).json({success:false,message:"some field is missing"})
+    }
+
+    const createdReview = await Review.create({
+      review,
+      courseId,
+      reviewer:req?.user?._id,
+      rating
+    })
+
+    return res.status(200).json({success:false,review:createdReview})
   } catch (error) {
     return res.status(500).json({success:false,message:error?.message})
   }
