@@ -85,7 +85,7 @@ export const createCourse = async (req, res) => {
 
 export const getAllCourses  = async(req,res)=>{
     try {
-        const courses = await Course.find({isPublish:true}).populate("creator","name avatar");
+        const courses = await Course.find({isPublish:true}).populate("creator","name avatar").limit(10);
         return res.status(200).json({success:true,message:courses})
     } catch (error) {
         return res.status(500).json({success:false,message:error?.message})
@@ -137,8 +137,9 @@ export const editCourse = async(req,res)=>{
 export const uploadLecture = async (req, res) => {
   try {
     const { id: courseId } = req.params;
+   
     const { title, isFree } = req.body;
-
+    
 
     // Validate required data
     if (!req.file) {
@@ -298,11 +299,14 @@ export const getSingleLecture = async(req,res)=>{
 
 export const makeCoursePublic = async(req,res)=>{
   try {
-    console.log("req");
     const {courseId} = req?.params;
     const {isPublish} = req?.body;
-    console.log("CI ",courseId,isPublish,req?.body);
     const course = await Course.findById({_id:courseId})
+
+    const lectures = await Lecture.find({courseId})
+    if(lectures?.length==0){
+      return res.status(400).json({success:false,message:"first upload at least 1 lecture"})
+    }
     if(!course){
       return res.status(200).json({success:false,message:"course not found"})
     }
@@ -386,5 +390,15 @@ export const userLearningProgress = async(req,res)=>{
       return res.status(200).json({success:false,progress:formatedData})
   } catch (error) {
     console.log(error?.message);
+  }
+}
+
+export const exploreCourse = async(req,res)=>{
+  try {
+    const allCourses = await Course.find({isPublish:true}).populate("creator","name avatar");
+    
+    return res.status(200).json({success:true,course:allCourses})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
   }
 }

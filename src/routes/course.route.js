@@ -4,6 +4,7 @@ import {
   deleteLecture,
   editCourse,
   editLecture,
+  exploreCourse,
   getAllCourses,
   getCourseById,
   getLectureVedioInstructor,
@@ -43,19 +44,7 @@ courseRoute.post(
   "/upload/lecture/:id",
   isAuthenticated,
   isInstructor,
-  (req, res, next) => {
-    uploadLectureMidd(req, res, (err) => {
-      if (err) {
-        // Multer errors
-        if (err instanceof multer.MulterError) {
-          return res.status(400).json({ error: err.message, code: err.code });
-        }
-        // Any other error inside multer/cloudinary
-        return res.status(500).json({ error: err.message || "Upload failed" });
-      }
-      next();
-    });
-  },
+  uploadLectureMidd,
   uploadLecture
 );
 
@@ -81,5 +70,7 @@ courseRoute.get("/course/course-purchase-status/:courseId",isAuthenticated,getCo
 // for learing page
 courseRoute.get("/course/learning/progress",isAuthenticated,userLearningProgress)
 
+// explore course
+courseRoute.get("/explore/courses",isAuthenticated,exploreCourse)
 export { courseRoute };
 

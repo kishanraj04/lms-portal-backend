@@ -31,6 +31,11 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json()); // will not interfere with webhook now
 app.use(express.urlencoded({ extended: true }));
+// app.use((err, req, res, next) => {
+//   console.error("Global Error Handler:", err);
+//   res.status(400).json({ success: false, message: err.message });
+// });
+
 
 // ✅ Your other routes
 app.use("/api/v1/user", userRouter);

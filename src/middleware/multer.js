@@ -1,23 +1,25 @@
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
 import cloudinary from '../../config/cloudinary.config.js';
+import path from 'path';
 
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
-    const isVideo = file.mimetype.startsWith('video/');
-    return {
-      folder: 'lms_uploads',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'pdf', 'mp4'],
-      public_id: `${Date.now()}-${file.originalname.split('.')[0]}`,
-      resource_type: 'auto', // or isVideo ? 'video' : 'image'
-      // ⛔️ If you see issues with videos, remove transformation or only apply to images
-      transformation: !isVideo ? [{ width: 500, height: 500, crop: 'limit' }] : undefined,
-    };
-  },
+  const isPDF = file.mimetype === 'application/pdf';
+  const baseName = path.parse(file.originalname).name;
+
+  return {
+    folder: 'lms_uploads',
+    resource_type: isPDF ? 'raw' : 'auto',
+    public_id: isPDF
+      ? `${Date.now()}-${baseName}.pdf`
+      : `${Date.now()}-${baseName}`,
+  };
+}
+
 });
 
-// Only accept these mimetypes
 const ALLOWED_MIMES = [
   'image/jpeg',
   'image/png',
@@ -36,12 +38,14 @@ const uploader = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB, change as you wish
+    fileSize: 200 * 1024 * 1024, // 200MB
   },
 });
 
+// ✅ Individual exports for different fields
 export const uploadSingle = uploader.single('avatar');
 export const uploadThumbnail = uploader.single('thumbnail');
 export const uploadLectureMidd = uploader.single('lectureVedio');
+export const uploadResourcesMidd = uploader.single("resources");
 
 export default uploader;
