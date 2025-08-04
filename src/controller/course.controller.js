@@ -2,6 +2,7 @@ import cloudinary from "../../config/cloudinary.config.js";
 import { Course } from "../models/Course.model.js";
 import { Lecture } from "../models/Lecture.model.js";
 import { LectureProgress } from "../models/LectureProgress.js";
+import { Purchase } from "../models/Purchase.mode.js";
 import { User } from "../models/User.model.js";
 export const createCourse = async (req, res) => {
   try {
@@ -398,6 +399,28 @@ export const exploreCourse = async(req,res)=>{
     const allCourses = await Course.find({isPublish:true}).populate("creator","name avatar");
     
     return res.status(200).json({success:true,course:allCourses})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const getMyEnrolledCourse = async(req,res)=>{
+  try {
+    const {_id} = req?.user
+    if(!_id) {
+      return res.status(401).json({success:false,message:"unauthorized access"})
+    }
+
+    const enrolledCourse = await Purchase.find({userId:_id,paymentStatus:"completed"}).populate("courseId")
+    console.log(enrolledCourse);
+    let course = enrolledCourse?.map(({courseId:cour})=>({
+      courseId:cour?._id,
+       title:cour?.title,
+       thumbnail:cour?.thumbnail?.url,
+       price:cour?.price
+    }))
+
+    return res.status(200).json({success:true,course})
   } catch (error) {
     return res.status(500).json({success:false,message:error?.message})
   }

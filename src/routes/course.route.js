@@ -9,6 +9,7 @@ import {
   getCourseById,
   getLectureVedioInstructor,
   getMyCourses,
+  getMyEnrolledCourse,
   getSingleLecture,
   makeCoursePublic,
   searchCourse,
@@ -72,5 +73,8 @@ courseRoute.get("/course/learning/progress",isAuthenticated,userLearningProgress
 
 // explore course
 courseRoute.get("/explore/courses",isAuthenticated,exploreCourse)
+
+courseRoute.get("/me/enrolled-course",isAuthenticated,getMyEnrolledCourse)
+
 export { courseRoute };
 
