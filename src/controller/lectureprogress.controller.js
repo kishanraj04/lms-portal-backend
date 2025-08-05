@@ -63,10 +63,10 @@ export const instructorCourseWithPrice = async (req, res) => {
       value: parseInt(price),
     }));
     if (modifyCourse.length == 0) {
-      modifyCourse = {
+      modifyCourse = [{
         name: "no course created",
         value: 0,
-      };
+      }];
     }
     return res
       .status(200)
@@ -92,10 +92,10 @@ export const courseWithEnrollStudent = async (req, res) => {
       })
     );
     if (courseWithEnrolledStu?.length == 0) {
-      courseWithEnrolledStu = {
+      courseWithEnrolledStu = [{
         name: " ",
         value: 0,
-      };
+      }];
     }
 
     return res.status(200).json({
@@ -106,10 +106,10 @@ export const courseWithEnrollStudent = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: error?.message,
-      courseWithEnrolledStudents: {
+      courseWithEnrolledStudents: [{
         name: " ",
         value: 0,
-      },
+      }],
     });
   }
 };

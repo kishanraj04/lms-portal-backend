@@ -8,6 +8,7 @@ import {
   exploreCourse,
   feedBack,
   getAllCourses,
+  getAllReviewByCourseId,
   getCourseById,
   getLectureVedioInstructor,
   getMyCourses,
@@ -15,6 +16,7 @@ import {
   getSingleLecture,
   makeCoursePublic,
   searchCourse,
+  updateReview,
   uploadLecture,
   userLearningProgress,
 } from "../controller/course.controller.js";
@@ -80,7 +82,11 @@ courseRoute.get("/me/enrolled-course",isAuthenticated,getMyEnrolledCourse)
 
 courseRoute.post("/cours/feedback",isAuthenticated,feedBack)
 
-courseRoute.get("/course/review/:courseId",isAuthenticated,courseReview)
+courseRoute.get("/course/review/:courseId",isAuthenticated,isInstructor,courseReview)
+
+courseRoute.get("/course/all-review/:courseId",isAuthenticated,isInstructor,getAllReviewByCourseId)
+
+courseRoute.put("/course/update/review/:reviewId",isAuthenticated,isInstructor,updateReview)
 
 export { courseRoute };
 

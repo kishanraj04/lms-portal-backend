@@ -568,3 +568,38 @@ export const courseReview = async (req, res) => {
     });
   }
 };
+
+
+export const getAllReviewByCourseId = async(req,res) => {
+  try {
+    const {courseId} = req?.params;
+    const review = await Review.find({courseId}).populate("reviewer","name")
+    const modifyReview = review?.map(({_id,review,reviewer,rating})=>({
+      reviewId:_id,
+      review,
+      rating,
+      reviewer:reviewer?.name
+    }))
+    
+    return res.status(200).json({success:false,totalReview:modifyReview})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
+export const updateReview = async(req,res)=>{
+  try {
+    const {reviewId} = req?.params;
+    const {review,rating} = req?.body;
+
+    if(!review || !rating){
+      return res.status(400).json({success:false,message:"all field required"})
+    }
+
+    const updatedReview = await Review.updateOne({_id:reviewId},{$set:{rating:rating,review:review}},{new:true})
+
+    return res.status(200).json({success:true,updateReview})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
