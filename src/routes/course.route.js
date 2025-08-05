@@ -3,6 +3,7 @@ import {
   courseReview,
   createCourse,
   deleteLecture,
+  deleteReview,
   editCourse,
   editLecture,
   exploreCourse,
@@ -87,6 +88,8 @@ courseRoute.get("/course/review/:courseId",isAuthenticated,isInstructor,courseRe
 courseRoute.get("/course/all-review/:courseId",isAuthenticated,isInstructor,getAllReviewByCourseId)
 
 courseRoute.put("/course/update/review/:reviewId",isAuthenticated,isInstructor,updateReview)
+
+courseRoute.delete("/course/delete-review/:reviewId",isAuthenticated,isInstructor,deleteReview)
 
 export { courseRoute };
 

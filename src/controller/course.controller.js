@@ -603,3 +603,23 @@ export const updateReview = async(req,res)=>{
     return res.status(500).json({success:false,message:error?.message})
   }
 }
+
+export const deleteReview = async (req, res) => {
+  try {
+    const { reviewId } = req.params;
+
+    if (!reviewId) {
+      return res.status(400).json({ success: false, message: "Review ID not provided" });
+    }
+
+    const result = await Review.deleteOne({ _id: reviewId });
+
+    if (result?.deletedCount > 0) {
+      return res.status(200).json({ success: true, message: "Review deleted" });
+    }
+
+    return res.status(400).json({ success: false, message: "Review not found or already deleted" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error?.message });
+  }
+};
