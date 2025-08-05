@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  courseReview,
   createCourse,
   deleteLecture,
   editCourse,
@@ -78,6 +79,8 @@ courseRoute.get("/explore/courses",isAuthenticated,exploreCourse)
 courseRoute.get("/me/enrolled-course",isAuthenticated,getMyEnrolledCourse)
 
 courseRoute.post("/cours/feedback",isAuthenticated,feedBack)
+
+courseRoute.get("/course/review/:courseId",isAuthenticated,courseReview)
 
 export { courseRoute };
 
