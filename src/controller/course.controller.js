@@ -1,11 +1,13 @@
 import cloudinary from "../../config/cloudinary.config.js";
 import { Course } from "../models/Course.model.js";
+import { Group } from "../models/Group.mode.js";
 import { Lecture } from "../models/Lecture.model.js";
 import { LectureProgress } from "../models/LectureProgress.js";
 import { Purchase } from "../models/Purchase.mode.js";
 import { Review } from "../models/Review.model.js";
 import { User } from "../models/User.model.js";
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from 'uuid';
 
 export const createCourse = async (req, res) => {
   try {
@@ -331,6 +333,18 @@ export const makeCoursePublic = async (req, res) => {
     const { courseId } = req?.params;
     const { isPublish } = req?.body;
     const course = await Course.findById({ _id: courseId });
+    console.log(req?.user);
+    const isGroup = await Group.findOne({course:courseId})
+    if(!isGroup){
+      await Group.create({
+    name: course?.title,
+    avatar: req?.user?.avatar,
+    course: course?._id,
+    roomId: uuidv4(), 
+    createdBy: req?.user?._id,
+    members: [req?.user?._id],
+  });
+    }
 
     const lectures = await Lecture.find({ courseId });
     if (lectures?.length == 0) {

@@ -3,6 +3,7 @@ import { Course } from "../models/Course.model.js";
 import { Purchase } from "../models/Purchase.mode.js";
 import { User } from "../models/User.model.js";
 import { Lecture } from "../models/Lecture.model.js"; // ✅ Make sure this exists
+import { Group } from "../models/Group.mode.js";
 
 const stripe = new Stripe(process.env.PUBLISHABLE_SECRET_KEY);
 
@@ -113,7 +114,12 @@ export const stripeWebhook = async (req, res) => {
         { _id: purchase?.userId },
         { $addToSet: { enrolled: purchase?.courseId } }
       );
-
+      
+      const group = await Group.findOne({course:purchase?.courseId})
+      if(group){
+        group?.members?.push(purchase?.userId);
+        await group.save()
+      }
 
       const courseRes = await Course.findByIdAndUpdate(
         purchase.courseId,
@@ -192,11 +198,10 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
       return res.status(404).json({ message: "course not found!" });
     }
 
-    // ✅ Only consider purchase if payment is completed
     const purchased = await Purchase.findOne({
       userId,
       courseId,
-      paymentStatus: 'completed'  // 🔥 Make sure this key exists in your model
+      paymentStatus: 'completed'  
     });
 
     let formattedLectures = [];

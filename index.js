@@ -9,6 +9,7 @@ import './config/db.config.js';
 import { stripeWebhook } from "./src/controller/purchase.controller.js";
 import { lectureProgree } from "./src/routes/lecturprogress.route.js";
 import { instructorRoute } from "./src/routes/instructor.route.js";
+import { groupRoute } from "./src/routes/group.route.js";
 
 dotenv.config();
 
@@ -42,6 +43,8 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/course", courseRoute);
 app.use("/api/v1/lectureprogress",lectureProgree)
 app.use("/api/v1/instructor",instructorRoute)
+app.use("/api/v1/group",groupRoute)
+
 app.listen(process.env.PORT, () => { 
   console.log(`✅ Server listening on port ${process.env.PORT}`);
 });
