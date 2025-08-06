@@ -132,6 +132,50 @@ export const stripeWebhook = async (req, res) => {
   res.status(200).end();
 };
 
+// export const getCourseDetailWithPurchaseStatus = async (req, res) => {
+//   try {
+//     const { courseId } = req.params;
+//     const { email } = req?.user;
+
+//     const usr = await User.findOne({ email });
+//     const userId = usr?._id;
+
+//     const course = await Course.findById(courseId)
+//       .populate("creator")
+//       .populate("lectures");
+
+//     if (!course) {
+//       return res.status(404).json({ message: "course not found!" });
+//     }
+
+//     const purchased = await Purchase.findOne({ userId, courseId });
+
+//     let formattedLectures = [];
+
+//     if (course.lectures && course.lectures.length > 0) {
+//       formattedLectures = course.lectures.map((lecture, index) => {
+//         const l = lecture.toObject();
+//         if (!purchased && index !== 0) {
+//           delete l.vedio; 
+//         }
+//         return l;
+//       });
+//     }
+
+//     return res.status(200).json({
+//       course: {
+//         ...course.toObject(),
+//         lectures: formattedLectures,
+//       },
+//       purchased: !!purchased,
+//     });
+
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
 export const getCourseDetailWithPurchaseStatus = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -148,7 +192,12 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
       return res.status(404).json({ message: "course not found!" });
     }
 
-    const purchased = await Purchase.findOne({ userId, courseId });
+    // ✅ Only consider purchase if payment is completed
+    const purchased = await Purchase.findOne({
+      userId,
+      courseId,
+      paymentStatus: 'completed'  // 🔥 Make sure this key exists in your model
+    });
 
     let formattedLectures = [];
 
