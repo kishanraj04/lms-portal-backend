@@ -60,25 +60,23 @@ app.use("/api/v1/lectureprogress", lectureProgree);
 app.use("/api/v1/instructor", instructorRoute);
 app.use("/api/v1/group", groupRoute);
 
-io.on("connection",async (socket) => {
-  
-  const {user} = socket;
-  const usr =await User.findOne({_id:user?._id})
-  const {avatar,name,_id} = usr;
+io.on("connection", async (socket) => {
+  const { user } = socket;
+  const usr = await User.findOne({ _id: user?._id });
+  const { avatar, name, _id } = usr;
+
   socket.on("join-room", (roomId) => {
     socket.join(roomId);
   });
 
   socket.on("message", async (msg) => {
-    const { content, groupId, roomId } = msg;
+    const { content, group, roomId } = msg; // <-- yaha groupId nahi, group
 
     const msgToSave = {
       content,
-      group: groupId,
+      group, // consistent name
       sender: socket.user?._id,
     };
-
-    
 
     try {
       await Message.create(msgToSave);
@@ -86,21 +84,24 @@ io.on("connection",async (socket) => {
       console.log(error?.message);
     }
 
-    io.to(roomId).emit("msg-from-server", { message:{
-      content,
-      groupId,
-      sender:{
-        name,
-        _id,
-        avatar
-      }
-    } });
+    io.to(roomId).emit("msg-from-server", {
+      message: {
+        content,
+        group, // same name as DB
+        sender: {
+          name,
+          _id,
+          avatar,
+        },
+      },
+    });
   });
 
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
   });
 });
+
 
 server.listen(process.env.PORT, () => {
   console.log(`✅ Server listening on port ${process.env.PORT}`);
