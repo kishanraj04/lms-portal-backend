@@ -68,6 +68,7 @@ export const directLogin = async (req, res) => {
         .json({ success: false, message: "unauthorized access" });
     }
     const user = await jwt.verify(token, process.env.JWT_SECRET);
+    console.log("user ",user);
     if (!user) {
       return res
         .status(401)
@@ -91,7 +92,7 @@ export const directLogin = async (req, res) => {
       .status(200)
       .json({ success: true, message: "valid user", user: usr });
   } catch (error) {
-    console.log(error?.message);
+    return res.status(500).json({success:false,message:error?.message})
   }
 };
 
