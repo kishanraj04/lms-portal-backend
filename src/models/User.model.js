@@ -31,6 +31,10 @@ const userSchema = new mongoose.Schema({
     enum: ["instructor", "student", "Instructor", "Student"],
     default: "student"
   },
+  allowToSendMsg:{
+    type:Boolean,
+    default:true
+  },
   enrolled: [
     {
       type: mongoose.Types.ObjectId,
