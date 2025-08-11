@@ -35,3 +35,14 @@ export const getGroupMessage = async(req,res)=>{
         return res.status(500).json({success:false,message:error?.message})
     }
 }
+
+export const getMyGroup = async(req,res)=>{
+    try {
+        const userId = req?.user
+        const group = await Group.find({createdBy:userId}).select("name").populate({path:"course",select:"thumbnail"})
+        
+        return res.status(200).json({success:true,group})
+    } catch (error) {
+        return res.status(500).json({success:false,message:error?.message})
+    }
+}
