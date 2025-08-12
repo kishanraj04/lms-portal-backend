@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Group } from "../models/Group.mode.js";
 import { Message } from "../models/Message.model.js";
 import { User } from "../models/User.model.js";
@@ -5,10 +6,6 @@ import { User } from "../models/User.model.js";
 export const getGroup = async (req, res) => {
   try {
     const { _id } = req?.user;
-    console.log("hii");
-    console.log(_id);
-    const allowToSend = await User.findOne({ _id }).select("allowToSendMsg").lean()
-    
     const groups = await Group.find({ members: _id });
 
     const modifyGroup = groups?.map(
@@ -26,7 +23,7 @@ export const getGroup = async (req, res) => {
         creator,
       })
     );
-    return res.status(200).json({ success: true, group: modifyGroup , allowToSend:allowToSend?.allowToSendMsg});
+    return res.status(200).json({ success: true, group: modifyGroup });
   } catch (error) {
     return res.status(500).json({ success: false, message: error?.message });
   }
@@ -35,18 +32,31 @@ export const getGroup = async (req, res) => {
 export const getGroupMessage = async (req, res) => {
   try {
     const { groupId } = req?.params;
+    const { _id: userId } = req?.user;
+
     if (!groupId) {
       return res
         .status(400)
         .json({ success: false, message: "group not found", data: [] });
     }
 
+    // Check if user is in deniedStudents array
+    const deniedRecord = await Group.findOne({
+      _id: groupId,
+      deniedStudents: userId,
+    });
+
+    const allToSendMsg = !deniedRecord; // true if user is allowed (NOT in deniedStudents)
+
+    // Get messages for the group, populate sender info
     const messages = await Message.find({ group: groupId }).populate(
       "sender",
       "name avatar"
     );
 
-    return res.status(200).json({ success: true, message: messages });
+    return res
+      .status(200)
+      .json({ success: true, message: messages, allToSendMsg });
   } catch (error) {
     return res.status(500).json({ success: false, message: error?.message });
   }
@@ -54,7 +64,7 @@ export const getGroupMessage = async (req, res) => {
 
 export const getMyGroup = async (req, res) => {
   try {
-    const userId = req?.user;
+    const userId = req?.user?._id || req?.user; // ensure _id access
     const group = await Group.find({ createdBy: userId })
       .select("name")
       .populate({ path: "course", select: "thumbnail" });
@@ -67,13 +77,68 @@ export const getMyGroup = async (req, res) => {
 
 export const getGroupStudents = async (req, res) => {
   try {
-    const { groupId } = req?.params;
-    console.log(groupId);
-    const students = await Group.find({ _id: groupId }, { members: 1, _id: 0 })
-      .populate({ path: "members", select: "name email avatar allowToSendMsg" })
-      .select("name emai avatar")
+    const { groupId } = req.params;
+
+    const group = await Group.findById(groupId)
+      .populate("members", "name email avatar")
+      .select("deniedStudents members") // ensure deniedStudents is fetched
       .lean();
 
-    return res.status(200).json({ success: true, students });
-  } catch (error) {}
+    if (!group) {
+      return res.status(404).json({ success: false, message: "Group not found" });
+    }
+
+    const deniedStudents = (group.deniedStudents || []).map(String);
+
+    const studentsWithStatus = group.members.map((member) => {
+      const memberIdStr = member._id.toString();
+      return {
+        ...member,
+        allowToSendMsg: !deniedStudents.includes(memberIdStr),
+      };
+    });
+
+    return res.status(200).json({ success: true, students: studentsWithStatus });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+export const stopUserFromSendingMsg = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { groupId } = req?.body;
+
+    // Add studentId to deniedStudents (avoid duplicates with $addToSet)
+    await Group.updateOne(
+      { _id: groupId },
+      { $addToSet: { deniedStudents: studentId } }
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Now, user can't send message" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error?.message });
+  }
+};
+
+export const allowUserFromSendingMsg = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { groupId } = req?.body;
+
+    // Remove studentId from deniedStudents
+    await Group.updateOne(
+      { _id: groupId },
+      { $pull: { deniedStudents: studentId } }
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Now, user can send message" });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error?.message });
+  }
 };
