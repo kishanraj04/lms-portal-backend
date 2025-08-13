@@ -142,3 +142,23 @@ export const allowUserFromSendingMsg = async (req, res) => {
     return res.status(500).json({ success: false, message: error?.message });
   }
 };
+
+
+export const removeUserFromGroup = async(req,res)=>{
+  try {
+    const {groupId} = req?.params;
+    const {studentId} = req?.body;
+
+    if(!studentId){
+      return res.status(400).json({success:false,message:"student not found"})
+    }
+    const removeFromDeneid = await Group.findByIdAndUpdate(groupId,{$pull:{deniedStudents:studentId}},{new:true})
+    
+    const removeFromMember = await Group.findByIdAndUpdate(groupId,{$pull:{members:studentId}},{new:true})
+
+    return res.status(200).json({success:true,message:"student removed"})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
+
