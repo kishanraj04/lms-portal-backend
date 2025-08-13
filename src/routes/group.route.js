@@ -1,6 +1,6 @@
 import express from 'express'
 import { isAuthenticated } from '../middleware/isAuthenticated.js'
-import { allowUserFromSendingMsg, getGroup, getGroupMessage, getGroupStudents, getMyGroup, removeUserFromGroup, stopUserFromSendingMsg } from '../controller/group.controller.js'
+import { addStudentInGroup, allowUserFromSendingMsg, getGroup, getGroupMessage, getGroupStudents, getMyGroup, removeUserFromGroup, stopUserFromSendingMsg } from '../controller/group.controller.js'
 import { isInstructor } from '../middleware/isInstructor.js'
 const groupRoute = express.Router()
 
@@ -19,6 +19,6 @@ groupRoute.put("/allow/user-msg/:studentId",isAuthenticated,isInstructor,allowUs
 
 groupRoute.delete("/group/delete-student/:groupId",isAuthenticated,isInstructor,removeUserFromGroup)
 
-groupRoute.post("/group/add-student/:groupId",isAuthenticated,isInstructor)
+groupRoute.post("/group/add-student/:groupId",isAuthenticated,isInstructor,addStudentInGroup)
 
 export  {groupRoute}

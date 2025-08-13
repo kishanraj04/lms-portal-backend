@@ -162,3 +162,26 @@ export const removeUserFromGroup = async(req,res)=>{
   }
 }
 
+export const addStudentInGroup = async(req,res)=>{
+  try {
+    const {groupId} = req?.params;
+    const {email} = req?.body;
+    console.log(groupId , email);
+    const group = await Group.findOne({_id:groupId})
+    if(!group){
+      return res.status(404).json({success:false,message:"group not found"})
+    }
+    const student = await User.findOne({email:email}).select({"email":1})
+    if(!student){
+      return res.status(404).json({success:false,message:"student not found"})
+    }
+
+    const {_id:studentId} = student;
+     group.members.push(studentId)
+    await group.save()
+
+    return res.status(200).json({success:true,message:"student added"})
+  } catch (error) {
+    return res.status(500).json({success:false,message:error?.message})
+  }
+}
